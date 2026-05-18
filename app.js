@@ -832,9 +832,7 @@ function initMediaPipe() {
 
   camera = new Camera(DOM.webcam, {
     onFrame: async () => {
-      if (!STATE.isPaused || !STATE.introComplete) {
-        await hands.send({ image: DOM.webcam });
-      }
+      await hands.send({ image: DOM.webcam });
     },
     width: 640,
     height: 480,
