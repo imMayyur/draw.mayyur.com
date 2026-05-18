@@ -304,16 +304,19 @@ function processGesture(rawGesture) {
 function handleGestureChange(newGesture) {
   const prevGesture = STATE.currentGesture;
 
+  // Once paused, stay paused — only thumbs up (clear) can reset
+  if (STATE.isPaused && newGesture !== "THUMBS_UP") {
+    return;
+  }
+
   switch (newGesture) {
     case "INDEX_UP":
       STATE.isDrawing = true;
-      STATE.isPaused = false;
       updateHUD("DRAW MODE", "Drawing with index finger");
       break;
 
     case "OPEN_PALM":
       STATE.isDrawing = false;
-      STATE.isPaused = false;
       if (STATE.currentTrail.length > 0) {
         finalizeTrail();
       }
@@ -339,6 +342,7 @@ function handleGestureChange(newGesture) {
 
     case "THUMBS_UP":
       STATE.isDrawing = false;
+      STATE.isPaused = false;
       clearCanvas();
       updateHUD("CLEARED", "Thumbs up - canvas cleared");
       break;
