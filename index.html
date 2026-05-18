@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MAYYUR AIR DRAW | Futuristic Air Drawing</title>
+    <meta
+      name="description"
+      content="MAYYUR AIR DRAW - A futuristic AI-powered air drawing experience using hand gesture recognition."
+    />
+    <meta name="theme-color" content="#0a0a0f" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300f5ff'/%3E%3Cstop offset='100%25' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='14' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Cpath d='M10 22 Q16 8 22 22' fill='none' stroke='url(%23g)' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='10' r='2' fill='%2300f5ff'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Startup Cinematic Intro -->
+    <div id="intro-overlay" class="intro-overlay">
+      <div class="intro-content">
+        <div class="intro-logo">
+          <svg class="intro-logo-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="introGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00f5ff" />
+                <stop offset="50%" stop-color="#a855f7" />
+                <stop offset="100%" stop-color="#ff006e" />
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="url(#introGrad)" stroke-width="2" class="intro-circle" />
+            <path
+              d="M30 80 Q60 20 90 80"
+              fill="none"
+              stroke="url(#introGrad)"
+              stroke-width="3"
+              stroke-linecap="round"
+              class="intro-path"
+            />
+            <circle cx="60" cy="35" r="5" fill="#00f5ff" class="intro-dot" />
+          </svg>
+        </div>
+        <h1 class="intro-title">MAYYUR AIR DRAW</h1>
+        <p class="intro-subtitle">Futuristic Gesture-Controlled Canvas</p>
+        <div class="intro-loader">
+          <div class="intro-loader-bar"></div>
+        </div>
+        <p class="intro-status" id="intro-status">Initializing...</p>
+      </div>
+    </div>
+
+    <!-- Background Effects -->
+    <div id="bg-effects" class="bg-effects">
+      <canvas id="bg-particles" class="bg-particles"></canvas>
+      <div class="bg-grid"></div>
+      <div class="bg-vignette"></div>
+    </div>
+
+    <!-- Main Canvas Layers -->
+    <div id="canvas-container" class="canvas-container">
+      <video id="webcam" class="webcam-feed" autoplay playsinline></video>
+      <canvas id="tracking-canvas" class="tracking-canvas"></canvas>
+      <canvas id="drawing-canvas" class="drawing-canvas"></canvas>
+      <canvas id="effects-canvas" class="effects-canvas"></canvas>
+      <canvas id="cursor-canvas" class="cursor-canvas"></canvas>
+    </div>
+
+    <!-- Brand Logo -->
+    <div class="brand-logo" id="brand-logo">
+      <svg class="brand-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00f5ff" />
+            <stop offset="100%" stop-color="#a855f7" />
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="16" fill="none" stroke="url(#brandGrad)" stroke-width="1.5" />
+        <path d="M10 30 Q20 8 30 30" fill="none" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" />
+        <circle cx="20" cy="12" r="2.5" fill="#00f5ff" />
+      </svg>
+      <span class="brand-text">MAYYUR AIR DRAW</span>
+    </div>
+
+    <!-- Gesture HUD -->
+    <div id="gesture-hud" class="gesture-hud">
+      <div class="hud-ring"></div>
+      <div class="hud-label" id="hud-label">READY</div>
+      <div class="hud-sublabel" id="hud-sublabel">Show your hand</div>
+    </div>
+
+    <!-- FPS Monitor -->
+    <div id="fps-monitor" class="fps-monitor">
+      <span class="fps-label">FPS</span>
+      <span class="fps-value" id="fps-value">60</span>
+    </div>
+
+    <!-- Floating Toolbar -->
+    <div id="toolbar" class="toolbar">
+      <div class="toolbar-header" id="toolbar-header">
+        <span class="toolbar-title">Controls</span>
+        <button class="toolbar-collapse-btn" id="toolbar-collapse-btn" aria-label="Collapse toolbar">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="toolbar-body" id="toolbar-body">
+        <!-- Color Picker -->
+        <div class="tool-group">
+          <label class="tool-label">Brush Color</label>
+          <div class="color-picker-row">
+            <div class="color-swatch active" data-color="#00f5ff" style="--swatch-color: #00f5ff"></div>
+            <div class="color-swatch" data-color="#a855f7" style="--swatch-color: #a855f7"></div>
+            <div class="color-swatch" data-color="#ff006e" style="--swatch-color: #ff006e"></div>
+            <div class="color-swatch" data-color="#39ff14" style="--swatch-color: #39ff14"></div>
+            <div class="color-swatch" data-color="#ffbe0b" style="--swatch-color: #ffbe0b"></div>
+            <div class="custom-color-wrapper" id="custom-color-wrapper">
+              <input
+                type="color"
+                id="custom-color"
+                class="custom-color-input"
+                value="#00f5ff"
+                aria-label="Custom color"
+              />
+              <svg class="custom-color-icon" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 22H22L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brush Size -->
+        <div class="tool-group">
+          <label class="tool-label">Brush Size <span id="size-value">4</span></label>
+          <input type="range" id="brush-size" class="tool-slider" min="1" max="20" value="4" />
+        </div>
+
+        <!-- Glow Intensity -->
+        <div class="tool-group">
+          <label class="tool-label">Glow Intensity <span id="glow-value">80</span>%</label>
+          <input type="range" id="glow-intensity" class="tool-slider" min="0" max="100" value="80" />
+        </div>
+
+        <!-- Toggles -->
+        <div class="tool-group toggles-row">
+          <button class="tool-btn" id="rainbow-btn" title="Rainbow Mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M4 18C4 12.477 8.477 8 14 8M4 14C4 10.686 6.686 8 10 8M12 18A6 6 0 0118 12"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <button class="tool-btn" id="clear-btn" title="Clear Canvas">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M3 6H21M8 6V4C8 3.448 8.448 3 9 3H15C15.552 3 16 3.448 16 4V6M19 6V20C19 20.552 18.552 21 18 21H6C5.448 21 5 20.552 5 20V6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <button class="tool-btn" id="undo-btn" title="Undo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M3 10H16C18.761 10 21 12.239 21 15C21 17.761 18.761 20 16 20H11M3 10L7 6M3 10L7 14"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="tool-btn" id="redo-btn" title="Redo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M21 10H8C5.239 10 3 12.239 3 15C3 17.761 5.239 20 8 20H13M21 10L17 6M21 10L17 14"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="tool-group toggles-row">
+          <button class="tool-btn" id="save-btn" title="Save PNG">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 3V15M12 15L8 11M12 15L16 11M4 17V19C4 19.552 4.448 20 5 20H19C19.552 20 20 19.552 20 19V17"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="tool-btn" id="fullscreen-btn" title="Fullscreen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M4 4H9M4 4V9M20 4H15M20 4V9M4 20H9M4 20V15M20 20H15M20 20V15"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="tool-btn" id="perf-btn" title="Performance Mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="tool-btn" id="sound-btn" title="Sound Effects">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M11 5L6 9H2V15H6L11 19V5ZM15.54 8.46C16.48 9.4 17 10.67 17 12C17 13.33 16.48 14.6 15.54 15.54M19.07 4.93C20.94 6.8 22 9.34 22 12C22 14.66 20.94 17.2 19.07 19.07"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="tool-btn" id="help-btn" title="Help & Tips">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+              <path
+                d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <circle cx="12" cy="17" r="1" fill="currentColor" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="help-modal" class="help-modal">
+      <div class="help-modal-content">
+        <div class="help-modal-header">
+          <h2 class="help-modal-title">Tips & Controls</h2>
+          <button class="help-close-btn" id="help-close-btn" aria-label="Close help">&times;</button>
+        </div>
+        <div class="help-modal-body">
+          <div class="help-section">
+            <h3 class="help-section-title">Hand Gestures</h3>
+            <div class="help-grid">
+              <div class="help-item">
+                <span class="help-gesture">☝️ Index Finger Up</span><span class="help-action">Draw</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">🖐️ Open Palm</span><span class="help-action">Erase</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">✊ Closed Fist</span><span class="help-action">Pause</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">✌️ Two Fingers Up</span><span class="help-action">Toggle Rainbow</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">👍 Thumbs Up</span><span class="help-action">Clear Canvas</span>
+              </div>
+            </div>
+          </div>
+          <div class="help-section">
+            <h3 class="help-section-title">Keyboard Shortcuts</h3>
+            <div class="help-grid">
+              <div class="help-item">
+                <span class="help-gesture">Ctrl + Z</span><span class="help-action">Undo</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">Ctrl + Y</span><span class="help-action">Redo</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">Ctrl + S</span><span class="help-action">Save PNG</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">C</span><span class="help-action">Clear Canvas</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">R</span><span class="help-action">Toggle Rainbow</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">F</span><span class="help-action">Fullscreen</span>
+              </div>
+              <div class="help-item">
+                <span class="help-gesture">P</span><span class="help-action">Performance Mode</span>
+              </div>
+            </div>
+          </div>
+          <div class="help-section">
+            <h3 class="help-section-title">Tips</h3>
+            <ul class="help-tips-list">
+              <li>Move your hand slowly for smoother lines</li>
+              <li>Use Performance Mode on slower devices</li>
+              <li>Drag the toolbar to reposition it</li>
+              <li>Adjust glow intensity for different effects</li>
+              <li>Rainbow mode cycles colors as you draw</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Watermark -->
+    <div class="watermark">draw.mayyur.com</div>
+
+    <!-- Screenshot Flash -->
+    <div id="screenshot-flash" class="screenshot-flash"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466124/drawing_utils.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
